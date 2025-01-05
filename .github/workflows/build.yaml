@@ -17,11 +17,8 @@ jobs:
       fail-fast: false
       matrix:
         sdk_url:
-          - https://downloads.openwrt.org/releases/21.02.2/targets/x86/64/openwrt-sdk-21.02.2-x86-64_gcc-8.4.0_musl.Linux-x86_64.tar.xz
-          - https://downloads.openwrt.org/releases/21.02.2/targets/x86/generic/openwrt-sdk-21.02.2-x86-generic_gcc-8.4.0_musl.Linux-x86_64.tar.xz
-          - https://downloads.openwrt.org/releases/21.02.2/targets/rockchip/armv8/openwrt-sdk-21.02.2-rockchip-armv8_gcc-8.4.0_musl.Linux-x86_64.tar.xz
-          - https://downloads.openwrt.org/releases/21.02.2/targets/mediatek/mt7622/openwrt-sdk-21.02.2-mediatek-mt7622_gcc-8.4.0_musl.Linux-x86_64.tar.xz
-
+          - https://downloads.openwrt.org/releases/24.10.0-rc4/targets/armsr/armv8/openwrt-sdk-24.10.0-rc4-armsr-armv8_gcc-13.3.0_musl.Linux-x86_64.tar.zst
+         
     steps:
     - name: Checkout
       uses: actions/checkout@main
@@ -39,17 +36,19 @@ jobs:
     - name: Download SDK
       run: |
         url=${{ matrix.sdk_url }}
-        sdk=$(basename $url | awk -F '.tar.xz' '{ print $1 }')
+        sdk=$(basename $url | awk -F '.tar.zst' '{ print $1 }')
 
         wget $url
-        tar xvf $sdk.tar.xz
+        tar -I zstd -xvf $sdk.tar.zst
+ #       tar xvf $sdk.tar.xz
 
+# git clone --depth 1 https://github.com/ntop/n2n -b 3.0 /tmp/n2n
     - name: Patch file
       run: |
-        git clone --depth 1 https://github.com/ntop/n2n -b 3.0 /tmp/n2n
+        git clone --depth 1 https://github.com/ntop/n2n -b dev /tmp/n2n
 
         url=${{ matrix.sdk_url }}
-        sdk=$(basename $url | awk -F '.tar.xz' '{ print $1 }')
+        sdk=$(basename $url | awk -F '.tar.zst' '{ print $1 }')
 
         cd $sdk/package
         cp -r /tmp/n2n/packages/openwrt .
@@ -58,7 +57,7 @@ jobs:
         rm -rf patches
 
         sed -i 's/PKG_SOURCE_VERSION:=.*/PKG_SOURCE_VERSION:=66f557af97b9c2ad42537516101fd04df2639ef0/g' Makefile
-        sed -i 's/PKG_VERSION:=.*/PKG_VERSION:=3.0.0/g' Makefile
+        sed -i 's/PKG_VERSION:=.*/PKG_VERSION:=3.1.1/g' Makefile
 
         # optimization
         sed -i '/package.mk/a CONFIGURE_ARGS += --with-openssl --with-zstd' Makefile
