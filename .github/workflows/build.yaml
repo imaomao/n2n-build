@@ -94,7 +94,7 @@ jobs:
         done
 
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@main
       with:
         name: ${{ env.IPKG_VERSION }}
         path: ${{ github.workspace }}/artifact/**/*
