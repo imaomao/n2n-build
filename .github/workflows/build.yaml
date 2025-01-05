@@ -65,7 +65,7 @@ jobs:
     - name: Compile
       run: |
         url=${{ matrix.sdk_url }}
-        sdk=$(basename $url | awk -F '.tar.xz' '{ print $1 }')
+        sdk=$(basename $url | awk -F '.tar.zst' '{ print $1 }')
 
         cd $sdk
 
